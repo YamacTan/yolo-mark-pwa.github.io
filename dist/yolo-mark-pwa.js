@@ -176,9 +176,11 @@ var mark;
                 this._wrappers = new Map();
             }
             class_2.prototype.applyTouchWrapper = function (callback) {
-                var handler = function (_a) {
-                    var touches = _a.touches;
-                    return callback(touches[0]);
+                var handler = function (e) {
+                    var touches = e.touches;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    callback(touches[0]);
                 };
                 this._wrappers.set(callback, handler);
                 return handler;
@@ -950,6 +952,8 @@ var mark;
                 resizePipeline.exec([img, area, root]);
                 area.style.visibility = 'visible';
             };
+            img.style.touchAction = 'none';
+            img.style.pointerEvents = 'none';
             img.style.position = 'absolute';
             img.crossOrigin = 'anonymous';
             img.style.width = '100%';
@@ -1526,7 +1530,8 @@ var mark;
             var onChangeCords = function (_a) {
                 var type = _a.type, id = _a.id, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                 return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? {
-                    type: type, id: id, top: top, left: left, height: height, width: width, name: c.name, color: c.color
+                    type: type, id: id, top: top, left: left, height: height, width: width,
+                    name: c.name, color: c.color
                 } : c; }); });
             };
             var onLoad = function () { return __awaiter(_this, void 0, void 0, function () {
