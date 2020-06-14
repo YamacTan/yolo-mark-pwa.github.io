@@ -175,11 +175,14 @@ var mark;
             function class_2() {
                 this._wrappers = new Map();
             }
-            class_2.prototype.applyTouchWrapper = function (callback) {
+            class_2.prototype.applyTouchWrapper = function (callback, passive) {
+                if (passive === void 0) { passive = false; }
                 var handler = function (e) {
                     var touches = e.touches;
-                    e.preventDefault();
-                    e.stopPropagation();
+                    if (!passive) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
                     callback(touches[0]);
                 };
                 this._wrappers.set(callback, handler);
@@ -194,7 +197,7 @@ var mark;
         }());
         var on = function (ref, event, callback) {
             if (event === 'mousemove') {
-                var wrapped = touchManager.applyTouchWrapper(callback);
+                var wrapped = touchManager.applyTouchWrapper(callback, true);
                 ref.addEventListener('mousemove', callback);
                 ref.addEventListener('touchmove', wrapped);
             }
@@ -204,7 +207,7 @@ var mark;
                 ref.addEventListener('touchstart', wrapped);
             }
             else if (event === 'mouseup') {
-                var wrapped = touchManager.applyTouchWrapper(callback);
+                var wrapped = touchManager.applyTouchWrapper(callback, true);
                 ref.addEventListener('mouseup', callback);
                 ref.addEventListener('touchend', wrapped);
             }
