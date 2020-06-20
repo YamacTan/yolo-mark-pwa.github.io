@@ -1105,13 +1105,13 @@ var mark;
             }
         }); });
         components.Selector = function (_a) {
-            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.id, id = _c === void 0 ? 'unset' : _c, _d = _a.cords, cords = _d === void 0 ? [] : _d, _e = _a.onChange, onChange = _e === void 0 ? function () {
+            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.id, id = _c === void 0 ? 'unset' : _c, _d = _a.cords, cords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.onChange, onChange = _g === void 0 ? function () {
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
                 return console.log({ args: args });
-            } : _e;
+            } : _g;
             var parentRef = useRef(null);
             var mountRef = useRef(true);
             var classes = useStyles();
@@ -1119,16 +1119,20 @@ var mark;
                 var current = parentRef.current;
                 current.innerHTML = "\n          <area-selector\n            imageSrc=\"" + src + "\"\n            id=\"" + id + "\">\n          </area-selector>\n        ";
                 var roi = function (args) {
-                    var id = args[0], top = args[1], left = args[2], right = args[3], bottom = args[4];
+                    var top = args[0], left = args[1], right = args[2], bottom = args[3];
                     var current = mountRef.current;
                     if (current)
-                        onChange({ type: 'roi', id: id, top: top, left: left, right: right, bottom: bottom });
+                        onChange({
+                            type: 'roi', id: 'roi', top: top, left: left,
+                            height: naturalHeight - top - bottom,
+                            width: naturalWidth - left - right
+                        });
                 };
                 var rect = function (args) {
                     var id = args[0], top = args[1], left = args[2], height = args[3], width = args[4];
                     var current = mountRef.current;
                     if (current)
-                        onChange({ type: 'rect', top: top, left: left, height: height, width: width, id: id });
+                        onChange({ type: 'rect', id: id, top: top, left: left, height: height, width: width });
                 };
                 var square = function (args) {
                     var id = args[0], top = args[1], left = args[2], side = args[3];
@@ -1172,9 +1176,10 @@ var mark;
 })(mark || (mark = {})); // namespace mark
 var mark;
 (function (mark) {
-    var _a = material.core, TableContainer = _a.TableContainer, TableFooter = _a.TableFooter, IconButton = _a.IconButton, TextField = _a.TextField, TableHead = _a.TableHead, TableCell = _a.TableCell, TableBody = _a.TableBody, TableRow = _a.TableRow, Button = _a.Button, Avatar = _a.Avatar, Table = _a.Table, Paper = _a.Paper, Grid = _a.Grid;
+    var _a = material.core, TableContainer = _a.TableContainer, TableFooter = _a.TableFooter, IconButton = _a.IconButton, TextField = _a.TextField, TableHead = _a.TableHead, TableCell = _a.TableCell, TableBody = _a.TableBody, Checkbox = _a.Checkbox, TableRow = _a.TableRow, Button = _a.Button, Avatar = _a.Avatar, Table = _a.Table, Paper = _a.Paper, Grid = _a.Grid, Box = _a.Box;
     var makeStyles = material.styles.makeStyles;
-    var _b = material.icons, CropLandscape = _b.CropLandscape, CropSquare = _b.CropSquare, Palette = _b.Palette, Publish = _b.Publish, Delete = _b.Delete, Save = _b.Save;
+    var _b = material.icons, CropLandscape = _b.CropLandscape, CropSquare = _b.CropSquare, CropFree = _b.CropFree, Palette = _b.Palette, Publish = _b.Publish, Delete = _b.Delete, Crop = _b.Crop, Save = _b.Save;
+    var round = Math.round;
     var components;
     (function (components) {
         var useStyles = makeStyles(function (theme) { return ({
@@ -1184,8 +1189,17 @@ var mark;
             },
             transparent: {
                 background: 'transparent'
+            },
+            center: {
+                alignItems: 'center',
+                display: 'flex'
             }
         }); });
+        var applyCordsOrder = function (cords) {
+            var roi = cords.find(function (c) { return c.type === 'roi'; });
+            var other = cords.filter(function (c) { return c.type !== 'roi'; });
+            return __spreadArrays(roi ? [roi] : [], other);
+        };
         components.CordPicker = function (_a) {
             var _b = _a.cords, cords = _b === void 0 ? [
                 {
@@ -1198,7 +1212,7 @@ var mark;
                     height: 100,
                     width: 100
                 }
-            ] : _b, _c = _a.onSave, onSave = _c === void 0 ? function () { return console.log('save'); } : _c, _d = _a.onLoad, onLoad = _d === void 0 ? function () { return console.log('load'); } : _d, _e = _a.onDelete, onDelete = _e === void 0 ? function (id) { return console.log({ id: id }); } : _e, _f = _a.onAddRect, onAddRect = _f === void 0 ? function () { return console.log('add rect'); } : _f, _g = _a.onAddSquare, onAddSquare = _g === void 0 ? function () { return console.log('add square'); } : _g, _h = _a.onNameChanged, onNameChanged = _h === void 0 ? function (id, name) { return console.log({ name: name, id: id }); } : _h;
+            ] : _b, _c = _a.onSave, onSave = _c === void 0 ? function () { return console.log('save'); } : _c, _d = _a.onLoad, onLoad = _d === void 0 ? function () { return console.log('load'); } : _d, _e = _a.onCrop, onCrop = _e === void 0 ? function (crop) { return console.log({ crop: crop }); } : _e, _f = _a.onDelete, onDelete = _f === void 0 ? function (id) { return console.log({ id: id }); } : _f, _g = _a.onAddRect, onAddRect = _g === void 0 ? function () { return console.log('add rect'); } : _g, _h = _a.onAddSquare, onAddSquare = _h === void 0 ? function () { return console.log('add square'); } : _h, _j = _a.onNameChanged, onNameChanged = _j === void 0 ? function (id, name) { return console.log({ name: name, id: id }); } : _j;
             var classes = useStyles();
             var onChange = function (id, _a) {
                 var target = _a.target;
@@ -1217,35 +1231,41 @@ var mark;
                             React.createElement(TableCell, { className: classes.transparent, align: "center" }, "Height"),
                             React.createElement(TableCell, { className: classes.transparent, align: "center" }, "Width"),
                             React.createElement(TableCell, { className: classes.transparent, align: "right" }, "Remove"))),
-                    React.createElement(TableBody, null, cords.map(function (_a) {
+                    React.createElement(TableBody, null, applyCordsOrder(cords).map(function (_a) {
                         var id = _a.id, type = _a.type, top = _a.top, left = _a.left, height = _a.height, width = _a.width, color = _a.color, name = _a.name;
                         return (React.createElement(TableRow, { key: id },
                             React.createElement(TableCell, { align: "left", component: "th", scope: "row" },
                                 React.createElement(Avatar, { style: { background: '#75757530' } },
                                     React.createElement(Palette, { style: { color: color } }))),
                             React.createElement(TableCell, { align: "left", component: "th", scope: "row" },
-                                React.createElement(TextField, { onChange: function (e) { return onChange(id, e); }, value: name, label: "Some class" })),
+                                React.createElement(TextField, { disabled: type === 'roi', onChange: function (e) { return onChange(id, e); }, value: name, label: "Some class" })),
                             React.createElement(TableCell, { align: "center" }, type),
-                            React.createElement(TableCell, { align: "center" }, top),
-                            React.createElement(TableCell, { align: "center" }, left),
-                            React.createElement(TableCell, { align: "center" }, height),
-                            React.createElement(TableCell, { align: "center" }, width),
+                            React.createElement(TableCell, { align: "center" }, round(top)),
+                            React.createElement(TableCell, { align: "center" }, round(left)),
+                            React.createElement(TableCell, { align: "center" }, round(height)),
+                            React.createElement(TableCell, { align: "center" }, round(width)),
                             React.createElement(TableCell, { align: "right" },
-                                React.createElement(IconButton, { onClick: function () { return onDelete(id); } },
+                                React.createElement(IconButton, { disabled: type === 'roi', onClick: function () { return onDelete(id); } },
                                     React.createElement(Delete, null)))));
                     })),
                     React.createElement(TableFooter, null,
                         React.createElement(TableRow, null,
-                            React.createElement(TableCell, { colSpan: 7, align: "left" },
-                                React.createElement(Grid, { container: true, spacing: 2 },
-                                    React.createElement(Grid, { item: true },
+                            React.createElement(TableCell, { colSpan: 8, align: "left" },
+                                React.createElement(Grid, { container: true, direction: "row", justify: "stretch", spacing: 2 },
+                                    React.createElement(Grid, { item: true, className: classes.center },
                                         React.createElement(Button, { startIcon: React.createElement(Save, null), onClick: onSave, size: "small", variant: "outlined", color: "primary" }, "Save markup")),
-                                    React.createElement(Grid, { item: true },
+                                    React.createElement(Grid, { item: true, className: classes.center },
                                         React.createElement(Button, { startIcon: React.createElement(Publish, null), onClick: onLoad, size: "small", variant: "outlined", color: "primary" }, "Load markup")),
-                                    React.createElement(Grid, { item: true },
+                                    React.createElement(Grid, { item: true, className: classes.center },
                                         React.createElement(Button, { startIcon: React.createElement(CropLandscape, null), onClick: onAddRect, size: "small", variant: "outlined", color: "secondary" }, "Add rect")),
-                                    React.createElement(Grid, { item: true },
-                                        React.createElement(Button, { startIcon: React.createElement(CropSquare, null), onClick: onAddSquare, size: "small", variant: "outlined", color: "secondary" }, "Add square")))))))));
+                                    React.createElement(Grid, { item: true, className: classes.center },
+                                        React.createElement(Button, { startIcon: React.createElement(CropSquare, null), onClick: onAddSquare, size: "small", variant: "outlined", color: "secondary" }, "Add square")),
+                                    React.createElement(Box, { flexGrow: 1 }),
+                                    React.createElement(Grid, { item: true, className: classes.center },
+                                        React.createElement(Checkbox, { onChange: function (_a) {
+                                                var target = _a.target;
+                                                return onCrop(target.checked);
+                                            }, icon: React.createElement(Crop, null), checkedIcon: React.createElement(CropFree, null) })))))))));
         };
     })(components = mark.components || (mark.components = {})); // namespace components
 })(mark || (mark = {})); // namespace mark
@@ -1418,12 +1438,53 @@ var mark;
         };
     })(utils = mark.utils || (mark.utils = {})); // namespace utils
 })(mark || (mark = {})); // namespace mark
+var mark;
+(function (mark) {
+    var utils;
+    (function (utils) {
+        var _this = this;
+        var loadImage = function (url) { return new Promise(function (res) {
+            var img = document.createElement('img');
+            img.onload = function () { return res(img); };
+            img.src = url;
+        }); };
+        var saveImage = function (blob, name) {
+            if (name === void 0) { name = 'image.png'; }
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            a.click();
+        };
+        utils.saveImageFile = function (_a) {
+            var url = _a.url, name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
+            return __awaiter(_this, void 0, void 0, function () {
+                var canvas, ctx, img;
+                var _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            canvas = document.createElement('canvas');
+                            _b = [height, width], canvas.height = _b[0], canvas.width = _b[1];
+                            ctx = canvas.getContext('2d');
+                            return [4 /*yield*/, loadImage(url)];
+                        case 1:
+                            img = _c.sent();
+                            ctx.drawImage(img, left, top, width, height, 0, 0, width, height);
+                            canvas.toBlob(function (blob) { return saveImage(blob, name); }, 'image/png');
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+    })(utils = mark.utils || (mark.utils = {})); // namespace utils
+})(mark || (mark = {})); // namespace mark
 /// <reference path="./file.ts"/>
 /// <reference path="./uuid.ts"/>
 /// <reference path="./color.ts"/>
 /// <reference path="./createExportCord.ts"/>
 /// <reference path="./saveMarkupFile.ts"/>
 /// <reference path="./readExportCord.ts"/>
+/// <reference path="./saveImageFile.ts"/>
 /// <reference path="./Selector.tsx"/>
 /// <reference path="./CordPicker.tsx"/>
 /// <reference path="../utils/index.ts"/>
@@ -1434,7 +1495,7 @@ var mark;
 (function (mark) {
     var uuid = mark.utils.uuid, color = mark.utils.color, openMarkup = mark.utils.openMarkup, readExportCord = mark.utils.readExportCord;
     var Fragment = React.Fragment, useState = React.useState, useEffect = React.useEffect;
-    var rect = mark.webcomponents.rect, square = mark.webcomponents.square;
+    var roi = mark.webcomponents.roi, rect = mark.webcomponents.rect, square = mark.webcomponents.square;
     var makeStyles = material.styles.makeStyles;
     var max = Math.max;
     var Typography = material.core.Typography;
@@ -1497,12 +1558,17 @@ var mark;
                 return true;
             }
         };
-        var lowLevelCords = function (cords) { return cords.map(function (_a) {
-            var id = _a.id, type = _a.type, height = _a.height, width = _a.width, top = _a.top, left = _a.left, color = _a.color;
-            return type === 'rect' ? rect(id, top, left, height, width, color)
-                : type === 'square' ? square(id, top, left, max(height, width), color)
-                    : console.error('lowLevelCords invalid cord type', type);
-        }); };
+        var lowLevelCords = function (cords, naturalHeight, naturalWidth) {
+            if (naturalHeight === void 0) { naturalHeight = 100; }
+            if (naturalWidth === void 0) { naturalWidth = 100; }
+            return cords.map(function (_a) {
+                var id = _a.id, type = _a.type, height = _a.height, width = _a.width, top = _a.top, left = _a.left, color = _a.color;
+                return type === 'rect' ? rect(id, top, left, height, width, color)
+                    : type === 'square' ? square(id, top, left, max(height, width), color)
+                        : type === 'roi' ? roi(top, left, naturalWidth - left - width, naturalHeight - top - height, color)
+                            : console.error('lowLevelCords invalid cord type', type);
+            });
+        };
         var useStyles = makeStyles(function (theme) { return ({
             container: {
                 margin: 24
@@ -1522,9 +1588,9 @@ var mark;
             color: color()
         }); };
         components.Editor = function (_a) {
-            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.name, name = _c === void 0 ? 'filename.png' : _c, _d = _a.initialCords, initialCords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.onSave, onSave = _g === void 0 ? function (cords) { return console.log({ cords: cords }); } : _g, _h = _a.onChange, onChange = _h === void 0 ? function (cords) { return console.log({ cords: cords }); } : _h;
-            var _j = useState(initialCords), cords = _j[0], setCords = _j[1];
-            var _k = useState([]), lowCords = _k[0], setLowCords = _k[1];
+            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.name, name = _c === void 0 ? 'filename.png' : _c, _d = _a.initialCords, initialCords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.onCrop, onCrop = _g === void 0 ? function (crop) { return console.log({ crop: crop }); } : _g, _h = _a.onSave, onSave = _h === void 0 ? function (cords) { return console.log({ cords: cords }); } : _h, _j = _a.onChange, onChange = _j === void 0 ? function (cords) { return console.log({ cords: cords }); } : _j;
+            var _k = useState(initialCords), cords = _k[0], setCords = _k[1];
+            var _l = useState([]), lowCords = _l[0], setLowCords = _l[1];
             var classes = useStyles();
             var onAddRect = function () { return setCords(function (cords) { return __spreadArrays(cords, [defaultCord('rect')]); }); };
             var onDelete = function (id) { return setCords(function (cords) { return cords.filter(function (c) { return c.id !== id; }); }); };
@@ -1533,8 +1599,7 @@ var mark;
             var onChangeCords = function (_a) {
                 var type = _a.type, id = _a.id, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                 return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? {
-                    type: type, id: id, top: top, left: left, height: height, width: width,
-                    name: c.name, color: c.color
+                    type: type, id: id, top: top, left: left, height: height, width: width, name: c.name, color: c.color
                 } : c; }); });
             };
             var onLoad = function () { return __awaiter(_this, void 0, void 0, function () {
@@ -1554,8 +1619,31 @@ var mark;
                     }
                 });
             }); };
+            var onCropChanged = function (enabled) {
+                if (enabled === void 0) { enabled = false; }
+                setCords(function (cords) {
+                    if (enabled && !cords.find(function (c) { return c.type === 'roi'; })) {
+                        var side = Math.min(naturalWidth, naturalHeight) * 0.05;
+                        var roi_1 = {
+                            type: 'roi',
+                            id: 'roi',
+                            color: '#ff00ff',
+                            top: side,
+                            left: side,
+                            height: naturalHeight - (2 * side),
+                            width: naturalWidth - (2 * side),
+                            name: 'Roi area'
+                        };
+                        return __spreadArrays(cords, [roi_1]);
+                    }
+                    else if (!enabled) {
+                        return cords.filter(function (c) { return c.type !== 'roi'; });
+                    }
+                });
+                setTimeout(function () { return onCrop(enabled); });
+            };
             useEffect(function () {
-                var newCords = lowLevelCords(cords);
+                var newCords = lowLevelCords(cords, naturalHeight, naturalWidth);
                 if (!deepCompare(newCords, lowCords)) {
                     setLowCords(newCords);
                 }
@@ -1566,9 +1654,9 @@ var mark;
             }, [initialCords]);
             return (React.createElement(Fragment, null,
                 React.createElement(Typography, { className: classes.fileName, variant: "h4" }, name),
-                React.createElement(components.Selector, { cords: lowCords, src: src, id: src, onChange: debounce(onChangeCords, 200) }),
+                React.createElement(components.Selector, { cords: lowCords, src: src, id: src, naturalHeight: naturalHeight, naturalWidth: naturalWidth, onChange: debounce(onChangeCords, 200) }),
                 React.createElement("div", { className: classes.container },
-                    React.createElement(components.CordPicker, { cords: cords, onNameChanged: onNameChanged, onSave: function () { return onSave(cords); }, onLoad: onLoad, onDelete: onDelete, onAddRect: onAddRect, onAddSquare: onAddSquare }))));
+                    React.createElement(components.CordPicker, { cords: cords, onNameChanged: onNameChanged, onSave: function () { return onSave(cords); }, onCrop: onCropChanged, onLoad: onLoad, onDelete: onDelete, onAddRect: onAddRect, onAddSquare: onAddSquare }))));
         };
     })(components = mark.components || (mark.components = {})); // namespace components
 })(mark || (mark = {})); // namespace mark
@@ -1583,12 +1671,13 @@ var mark;
 /// <reference path="../components/index.ts"/>
 /// <reference path="../utils/index.ts"/>
 (function (mark) {
-    var openImage = mark.utils.openImage, saveMarkupFile = mark.utils.saveMarkupFile, createExportCord = mark.utils.createExportCord;
+    var openImage = mark.utils.openImage, saveImageFile = mark.utils.saveImageFile, saveMarkupFile = mark.utils.saveMarkupFile, createExportCord = mark.utils.createExportCord;
     var Files = mark.components.Files, Editor = mark.components.Editor;
     var _a = material.core, Drawer = _a.Drawer, Typography = _a.Typography;
     var Fragment = React.Fragment;
     var makeStyles = material.styles.makeStyles;
     var useState = React.useState, useCallback = React.useCallback;
+    var min = Math.min, max = Math.max;
     var pages;
     (function (pages) {
         var _this = this;
@@ -1617,6 +1706,7 @@ var mark;
             var _a = useState(new Map()), cordsList = _a[0], setCordsList = _a[1];
             var _b = useState(null), currentFile = _b[0], setCurrentFile = _b[1];
             var _c = useState([]), files = _c[0], setFiles = _c[1];
+            var _d = useState(false), crop = _d[0], setCrop = _d[1];
             var getInitialCords = function (file) {
                 var url = file.url;
                 if (cordsList && cordsList.has(url)) {
@@ -1628,13 +1718,49 @@ var mark;
             };
             var onSave = function (url, cords) {
                 var file = files.find(function (f) { return f.url === url; });
-                var name = file.name, naturalHeight = file.naturalHeight, naturalWidth = file.naturalWidth;
-                saveMarkupFile(cords.map(function (_a) {
-                    var name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
-                    return createExportCord({
-                        name: name, top: top, left: left, height: height, width: width, naturalHeight: naturalHeight, naturalWidth: naturalWidth
-                    });
-                }).join("\n"), withoutExtension(name) + '.txt');
+                var applyRoiAdjust = function (cords, roi) {
+                    var top = roi.top, left = roi.left, height = roi.height, width = roi.width;
+                    var heightClearfix = function (c) {
+                        if ((c.top + c.height) > (top + height)) {
+                            return c.height - ((c.top + c.height) - (top + height));
+                        }
+                        else {
+                            return c.height;
+                        }
+                    };
+                    var widthClearfix = function (c) {
+                        if ((c.left + c.width) > (left + width)) {
+                            return c.width - ((c.left + c.width) - (left + width));
+                        }
+                        else {
+                            return c.width;
+                        }
+                    };
+                    return cords.slice().filter(function (type) { return type !== 'roi'; }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - top, 0), left: max(c.left - left, 0), height: heightClearfix(c), width: widthClearfix(c) })); });
+                };
+                if (crop) {
+                    var roi_2 = cords.find(function (c) { return c.type === 'roi'; });
+                    var top_6 = roi_2.top, left = roi_2.left, height = roi_2.height, width = roi_2.width;
+                    var url_1 = file.url, name_2 = file.name;
+                    saveImageFile({ url: url_1, name: name_2, top: top_6, left: left, height: height, width: width });
+                    saveMarkupFile(applyRoiAdjust(cords, roi_2).map(function (_a) {
+                        var name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
+                        return createExportCord({
+                            name: name, top: top, left: left, height: height, width: width,
+                            naturalHeight: roi_2.height,
+                            naturalWidth: roi_2.width
+                        });
+                    }).join("\n"), withoutExtension(name_2) + '.txt');
+                }
+                else {
+                    var name_3 = file.name, naturalHeight_1 = file.naturalHeight, naturalWidth_1 = file.naturalWidth;
+                    saveMarkupFile(cords.filter(function (type) { return type !== 'roi'; }).map(function (_a) {
+                        var name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
+                        return createExportCord({
+                            name: name, top: top, left: left, height: height, width: width, naturalHeight: naturalHeight_1, naturalWidth: naturalWidth_1
+                        });
+                    }).join("\n"), withoutExtension(name_3) + '.txt');
+                }
             };
             var onAddImage = function () { return __awaiter(_this, void 0, void 0, function () {
                 var file;
@@ -1663,7 +1789,7 @@ var mark;
             }); };
             var render = function () {
                 if (currentFile) {
-                    return (React.createElement(Editor, { src: currentFile.url, name: currentFile.name, naturalWidth: currentFile.naturalWidth, naturalHeight: currentFile.naturalHeight, initialCords: getInitialCords(currentFile), onSave: function (cords) { return onSave(currentFile.url, cords); }, onChange: function (c) { return onEditorChange(currentFile.url, c); } }));
+                    return (React.createElement(Editor, { src: currentFile.url, name: currentFile.name, onCrop: function (v) { return setCrop(v); }, naturalWidth: currentFile.naturalWidth, naturalHeight: currentFile.naturalHeight, initialCords: getInitialCords(currentFile), onSave: function (cords) { return onSave(currentFile.url, cords); }, onChange: function (c) { return onEditorChange(currentFile.url, c); } }));
                 }
                 else {
                     return (React.createElement(Typography, { className: classes.openFile, variant: "h4" }, "Please open file to continue"));
