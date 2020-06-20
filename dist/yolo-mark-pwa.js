@@ -1123,7 +1123,8 @@ var mark;
                     var current = mountRef.current;
                     if (current)
                         onChange({
-                            type: 'roi', id: 'roi', top: top, left: left,
+                            type: 'roi', id: 'roi',
+                            top: top, left: left,
                             height: naturalHeight - top - bottom,
                             width: naturalWidth - left - right
                         });
@@ -1599,22 +1600,23 @@ var mark;
             var onChangeCords = function (_a) {
                 var type = _a.type, id = _a.id, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                 return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? {
-                    type: type, id: id, top: top, left: left, height: height, width: width, name: c.name, color: c.color
+                    type: type, id: id, top: top, left: left, height: height, width: width,
+                    name: c.name, color: c.color
                 } : c; }); });
             };
             var onLoad = function () { return __awaiter(_this, void 0, void 0, function () {
-                var line, cords;
+                var line;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, openMarkup()];
                         case 1:
                             line = _a.sent();
-                            cords = readExportCord({
+                            setCords([]);
+                            setTimeout(function () { return setCords(readExportCord({
                                 lines: line.split('\n'),
                                 naturalHeight: naturalHeight,
                                 naturalWidth: naturalWidth
-                            });
-                            setCords(cords);
+                            })); });
                             return [2 /*return*/];
                     }
                 });
@@ -1677,7 +1679,7 @@ var mark;
     var Fragment = React.Fragment;
     var makeStyles = material.styles.makeStyles;
     var useState = React.useState, useCallback = React.useCallback;
-    var min = Math.min, max = Math.max;
+    var max = Math.max, min = Math.min;
     var pages;
     (function (pages) {
         var _this = this;
@@ -1718,29 +1720,11 @@ var mark;
             };
             var onSave = function (url, cords) {
                 var file = files.find(function (f) { return f.url === url; });
-                var applyRoiAdjust = function (cords, roi) {
-                    var top = roi.top, left = roi.left, height = roi.height, width = roi.width;
-                    var heightClearfix = function (c) {
-                        if ((c.top + c.height) > (top + height)) {
-                            return c.height - ((c.top + c.height) - (top + height));
-                        }
-                        else {
-                            return c.height;
-                        }
-                    };
-                    var widthClearfix = function (c) {
-                        if ((c.left + c.width) > (left + width)) {
-                            return c.width - ((c.left + c.width) - (left + width));
-                        }
-                        else {
-                            return c.width;
-                        }
-                    };
-                    return cords.slice().filter(function (_a) {
-                        var type = _a.type;
-                        return type !== 'roi';
-                    }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - top, 0), left: max(c.left - left, 0), height: heightClearfix(c), width: widthClearfix(c) })); });
-                };
+                var applyRoiAdjust = function (cords, roi) { return cords.slice()
+                    .filter(function (_a) {
+                    var type = _a.type;
+                    return type !== 'roi';
+                }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - roi.top, 0), left: max(c.left - roi.left, 0), height: min(max(c.top + c.height - roi.top, 0), max(roi.top + roi.height - c.top, 0), roi.height), width: min(max(c.left + c.width - roi.left, 0), max(roi.left + roi.width - c.left, 0), roi.width) })); }); };
                 if (crop) {
                     var roi_2 = cords.find(function (c) { return c.type === 'roi'; });
                     var top_6 = roi_2.top, left = roi_2.left, height = roi_2.height, width = roi_2.width;
