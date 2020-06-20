@@ -1736,7 +1736,10 @@ var mark;
                             return c.width;
                         }
                     };
-                    return cords.slice().filter(function (type) { return type !== 'roi'; }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - top, 0), left: max(c.left - left, 0), height: heightClearfix(c), width: widthClearfix(c) })); });
+                    return cords.slice().filter(function (_a) {
+                        var type = _a.type;
+                        return type !== 'roi';
+                    }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - top, 0), left: max(c.left - left, 0), height: heightClearfix(c), width: widthClearfix(c) })); });
                 };
                 if (crop) {
                     var roi_2 = cords.find(function (c) { return c.type === 'roi'; });
@@ -1754,7 +1757,10 @@ var mark;
                 }
                 else {
                     var name_3 = file.name, naturalHeight_1 = file.naturalHeight, naturalWidth_1 = file.naturalWidth;
-                    saveMarkupFile(cords.filter(function (type) { return type !== 'roi'; }).map(function (_a) {
+                    saveMarkupFile(cords.filter(function (_a) {
+                        var type = _a.type;
+                        return type !== 'roi';
+                    }).map(function (_a) {
                         var name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                         return createExportCord({
                             name: name, top: top, left: left, height: height, width: width, naturalHeight: naturalHeight_1, naturalWidth: naturalWidth_1
