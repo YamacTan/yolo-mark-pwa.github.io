@@ -109,7 +109,7 @@ var mark;
 (function (mark) {
     var _a = material.core, Box = _a.Box, List = _a.List, Avatar = _a.Avatar, ListItem = _a.ListItem, IconButton = _a.IconButton, Typography = _a.Typography, ListItemText = _a.ListItemText, ListItemAvatar = _a.ListItemAvatar, ListItemSecondaryAction = _a.ListItemSecondaryAction;
     var makeStyles = material.styles.makeStyles;
-    var _b = material.icons, Add = _b.Add, Image = _b.Image, Clear = _b.Clear;
+    var _b = material.icons, Add = _b.Add, Image = _b.Image, Clear = _b.Clear, ArrowDropUp = _b.ArrowDropUp, ArrowDropDown = _b.ArrowDropDown;
     var components;
     (function (components) {
         var useStyles = makeStyles(function (theme) { return ({
@@ -124,25 +124,33 @@ var mark;
             maxWidth: {
                 maxWidth: '120px',
                 overflow: 'hidden'
+            },
+            focused: {
+                background: '#ffffff1a'
             }
         }); });
         components.Files = function (_a) {
             var _b = _a.files, files = _b === void 0 ? [
-                { name: 'file.png', date: 'Jan 9, 2014', url: 'unset' }
-            ] : _b, _c = _a.onSelect, onSelect = _c === void 0 ? function (select) { return console.log({ select: select }); } : _c, _d = _a.onRemove, onRemove = _d === void 0 ? function (remove) { return console.log({ remove: remove }); } : _d, _e = _a.onAdd, onAdd = _e === void 0 ? function () { return console.log('add'); } : _e;
+                { name: 'file.png', date: 'Jan 9, 2014', url: 'unset', color: '#424242' }
+            ] : _b, _c = _a.current, current = _c === void 0 ? '' : _c, _d = _a.onSelect, onSelect = _d === void 0 ? function (select) { return console.log({ select: select }); } : _d, _e = _a.onRemove, onRemove = _e === void 0 ? function (remove) { return console.log({ remove: remove }); } : _e, _f = _a.onGo, onGo = _f === void 0 ? function (go) { return console.log({ go: go }); } : _f, _g = _a.onAdd, onAdd = _g === void 0 ? function () { return console.log('add'); } : _g;
             var classes = useStyles();
             return (React.createElement(List, { className: classes.list },
                 React.createElement(Box, { className: classes.header, display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "stretch" },
                     React.createElement(Box, { flex: 1, display: "flex", alignItems: "center" },
                         React.createElement(Typography, { variant: "h6" }, "Files")),
-                    React.createElement(IconButton, { onClick: onAdd },
+                    React.createElement(IconButton, { size: "small", onClick: function () { return onGo(-1); } },
+                        React.createElement(ArrowDropUp, null)),
+                    React.createElement(IconButton, { size: "small", onClick: function () { return onGo(1); } },
+                        React.createElement(ArrowDropDown, null)),
+                    React.createElement(IconButton, { size: "small", onClick: onAdd },
                         React.createElement(Add, null))),
                 files.map(function (_a, index) {
-                    var name = _a.name, date = _a.date, url = _a.url;
-                    return (React.createElement(ListItem, { onClick: function () { return onSelect(url); }, button: true, key: index },
+                    var _b;
+                    var name = _a.name, date = _a.date, url = _a.url, color = _a.color;
+                    return (React.createElement(ListItem, { className: classNames((_b = {}, _b[classes.focused] = url === current, _b)), onClick: function () { return onSelect(url); }, button: true, key: index },
                         React.createElement(ListItemAvatar, null,
                             React.createElement(Avatar, null,
-                                React.createElement(Image, null))),
+                                React.createElement(Image, { style: { color: color } }))),
                         React.createElement(ListItemText, { className: classes.maxWidth, primary: name, secondary: date }),
                         React.createElement(ListItemSecondaryAction, null,
                             React.createElement(IconButton, { onClick: function () { return onRemove(url); }, edge: "end" },
@@ -1123,8 +1131,7 @@ var mark;
                     var current = mountRef.current;
                     if (current)
                         onChange({
-                            type: 'roi', id: 'roi',
-                            top: top, left: left,
+                            type: 'roi', id: 'roi', top: top, left: left,
                             height: naturalHeight - top - bottom,
                             width: naturalWidth - left - right
                         });
@@ -1151,7 +1158,10 @@ var mark;
                     for (var _i = 2; _i < arguments.length; _i++) {
                         args[_i - 2] = arguments[_i];
                     }
-                    if (refId === id) {
+                    if (args.find(function (v) { return typeof v === 'number' && isNaN(v); }) !== undefined) {
+                        return;
+                    }
+                    else if (refId === id) {
                         switch (type) {
                             case 'rect-area-changed':
                                 rect(args);
@@ -1275,6 +1285,55 @@ var mark;
     var utils;
     (function (utils) {
         var _this = this;
+        utils.averageColor = function (url) { return __awaiter(_this, void 0, void 0, function () {
+            var loadImage, componentToHex, img, _a, height, width, canvas, context, data, _b, red, green, blue, count, step, i;
+            var _c, _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        loadImage = function (url) { return new Promise(function (res) {
+                            var img = document.createElement('img');
+                            img.onload = function () { return res(img); };
+                            img.src = url;
+                        }); };
+                        componentToHex = function (c) {
+                            var hex = c.toString(16);
+                            return hex.length === 1 ? "0" + hex : hex;
+                        };
+                        return [4 /*yield*/, loadImage(url)];
+                    case 1:
+                        img = _f.sent();
+                        _a = [
+                            img.naturalHeight,
+                            img.naturalWidth
+                        ], height = _a[0], width = _a[1];
+                        canvas = document.createElement('canvas');
+                        _c = [height, width], canvas.height = _c[0], canvas.width = _c[1];
+                        context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0);
+                        data = context.getImageData(0, 0, width, height).data;
+                        _b = __spreadArrays(new Array(4)).fill(0), red = _b[0], green = _b[1], blue = _b[2], count = _b[3];
+                        step = data.length / (height * width);
+                        for (i = 0; i !== data.length; i += step) {
+                            _d = [
+                                red + data[i],
+                                green + data[i + 1],
+                                blue + data[i + 2],
+                            ], red = _d[0], green = _d[1], blue = _d[2];
+                        }
+                        count = data.length / step;
+                        _e = [red, green, blue].map(function (v) { return Math.round(v / count); }), red = _e[0], green = _e[1], blue = _e[2];
+                        return [2 /*return*/, "#" + componentToHex(red) + componentToHex(green) + componentToHex(blue)];
+                }
+            });
+        }); };
+    })(utils = mark.utils || (mark.utils = {})); // namespace utils
+})(mark || (mark = {})); // namespace mark
+var mark;
+(function (mark) {
+    var utils;
+    (function (utils) {
+        var _this = this;
         var readSize = function (src) { return new Promise(function (res) {
             var img = document.createElement('img');
             img.onload = function () {
@@ -1283,36 +1342,62 @@ var mark;
             };
             img.src = src;
         }); };
+        utils.loadFile = function (file) { return new Promise(function (res) {
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onload = function () { return __awaiter(_this, void 0, void 0, function () {
+                var result, blob, url, date, _a, naturalHeight, naturalWidth, color;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            result = reader.result;
+                            blob = new Blob([result], { type: file.type });
+                            url = URL.createObjectURL(blob);
+                            date = new Date(file.lastModified).toISOString();
+                            return [4 /*yield*/, readSize(url)];
+                        case 1:
+                            _a = _b.sent(), naturalHeight = _a.naturalHeight, naturalWidth = _a.naturalWidth;
+                            return [4 /*yield*/, utils.averageColor(url)];
+                        case 2:
+                            color = _b.sent();
+                            res({ url: url, name: file.name, date: date, naturalHeight: naturalHeight, naturalWidth: naturalWidth, color: color });
+                            return [2 /*return*/];
+                    }
+                });
+            }); };
+        }); };
+        utils.loadMarkup = function (file) { return new Promise(function (res) {
+            var reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function () {
+                var result = reader.result;
+                res(result.split('\n'));
+            };
+        }); };
         utils.openImage = function () { return new Promise(function (res) {
             var input = document.createElement('input');
             input.type = 'file';
             input.accept = '.png, .jpg';
             input.onchange = function (_a) {
                 var target = _a.target;
-                var file = target.files[0];
-                var name = file.name;
-                var extension = name.split('.').pop().toLowerCase();
-                if (extension === 'png' || extension === "jpg") {
-                    var reader_1 = new FileReader();
-                    reader_1.readAsArrayBuffer(file);
-                    reader_1.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-                        var result, blob, url, date, _a, naturalHeight, naturalWidth;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0:
-                                    result = reader_1.result;
-                                    blob = new Blob([result], { type: file.type });
-                                    url = URL.createObjectURL(blob);
-                                    date = new Date(file.lastModified).toISOString();
-                                    return [4 /*yield*/, readSize(url)];
-                                case 1:
-                                    _a = _b.sent(), naturalHeight = _a.naturalHeight, naturalWidth = _a.naturalWidth;
-                                    res({ url: url, name: name, date: date, naturalHeight: naturalHeight, naturalWidth: naturalWidth });
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); };
-                }
+                return __awaiter(_this, void 0, void 0, function () {
+                    var file, name, extension, _b;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                file = target.files[0];
+                                name = file.name;
+                                extension = name.split('.').pop().toLowerCase();
+                                if (!(extension === 'png' || extension === "jpg")) return [3 /*break*/, 2];
+                                _b = res;
+                                return [4 /*yield*/, utils.loadFile(file)];
+                            case 1:
+                                _b.apply(void 0, [_c.sent()]);
+                                _c.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                });
             };
             input.click();
         }); };
@@ -1322,21 +1407,24 @@ var mark;
             input.accept = '.txt';
             input.onchange = function (_a) {
                 var target = _a.target;
-                var file = target.files[0];
-                var name = file.name;
-                var extension = name.split('.').pop().toLowerCase();
-                if (extension === 'txt') {
-                    var reader_2 = new FileReader();
-                    reader_2.readAsText(file);
-                    reader_2.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-                        var result;
-                        return __generator(this, function (_a) {
-                            result = reader_2.result;
-                            res(result);
-                            return [2 /*return*/];
-                        });
-                    }); };
-                }
+                return __awaiter(_this, void 0, void 0, function () {
+                    var file, name, extension, _b;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                file = target.files[0];
+                                name = file.name;
+                                extension = name.split('.').pop().toLowerCase();
+                                if (!(extension === 'txt')) return [3 /*break*/, 2];
+                                _b = res;
+                                return [4 /*yield*/, utils.loadMarkup(file)];
+                            case 1:
+                                _b.apply(void 0, [_c.sent()]);
+                                _c.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                });
             };
             input.click();
         }); };
@@ -1346,7 +1434,12 @@ var mark;
 (function (mark) {
     var utils;
     (function (utils) {
-        utils.uuid = function () { return Math.random().toString(36).substring(7); };
+        // tslint:disable: no-bitwise
+        utils.uuid = function () { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0;
+            var v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        }); };
     })(utils = mark.utils || (mark.utils = {})); // namespace utils
 })(mark || (mark = {})); // namespace mark
 var mark;
@@ -1391,7 +1484,6 @@ var mark;
             var a = document.createElement('a');
             _a = [url, name], a.href = _a[0], a.download = _a[1];
             a.click();
-            window.URL.revokeObjectURL(url);
         };
     })(utils = mark.utils || (mark.utils = {})); // namespace utils
 })(mark || (mark = {})); // namespace mark
@@ -1479,6 +1571,7 @@ var mark;
         };
     })(utils = mark.utils || (mark.utils = {})); // namespace utils
 })(mark || (mark = {})); // namespace mark
+/// <reference path="./averageColor.ts"/>
 /// <reference path="./file.ts"/>
 /// <reference path="./uuid.ts"/>
 /// <reference path="./color.ts"/>
@@ -1495,7 +1588,7 @@ var mark;
 /// <reference path="../utils/index.ts"/>
 (function (mark) {
     var uuid = mark.utils.uuid, color = mark.utils.color, openMarkup = mark.utils.openMarkup, readExportCord = mark.utils.readExportCord;
-    var Fragment = React.Fragment, useState = React.useState, useEffect = React.useEffect;
+    var Fragment = React.Fragment, useRef = React.useRef, useState = React.useState, useEffect = React.useEffect;
     var roi = mark.webcomponents.roi, rect = mark.webcomponents.rect, square = mark.webcomponents.square;
     var makeStyles = material.styles.makeStyles;
     var max = Math.max;
@@ -1533,7 +1626,7 @@ var mark;
                     var id2 = _b[0], type2 = _b[1];
                     return ("" + id1 + type1).localeCompare("" + id2 + type2);
                 });
-                var l2_1 = low1.sort(function (_a, _b) {
+                var l2_1 = low2.sort(function (_a, _b) {
                     var id1 = _a[0], type1 = _a[1];
                     var id2 = _b[0], type2 = _b[1];
                     return ("" + id1 + type1).localeCompare("" + id2 + type2);
@@ -1592,31 +1685,40 @@ var mark;
             var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.name, name = _c === void 0 ? 'filename.png' : _c, _d = _a.initialCords, initialCords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.onCrop, onCrop = _g === void 0 ? function (crop) { return console.log({ crop: crop }); } : _g, _h = _a.onSave, onSave = _h === void 0 ? function (cords) { return console.log({ cords: cords }); } : _h, _j = _a.onChange, onChange = _j === void 0 ? function (cords) { return console.log({ cords: cords }); } : _j;
             var _k = useState(initialCords), cords = _k[0], setCords = _k[1];
             var _l = useState([]), lowCords = _l[0], setLowCords = _l[1];
+            var internalUpdate = useRef(false);
             var classes = useStyles();
-            var onAddRect = function () { return setCords(function (cords) { return __spreadArrays(cords, [defaultCord('rect')]); }); };
-            var onDelete = function (id) { return setCords(function (cords) { return cords.filter(function (c) { return c.id !== id; }); }); };
-            var onAddSquare = function () { return setCords(function (cords) { return __spreadArrays(cords, [defaultCord('square')]); }); };
+            var onAddRect = function () {
+                setCords(function (cords) { return __spreadArrays(cords, [defaultCord('rect')]); });
+                internalUpdate.current = true;
+            };
+            var onDelete = function (id) {
+                setCords(function (cords) { return cords.filter(function (c) { return c.id !== id; }); });
+                internalUpdate.current = true;
+            };
+            var onAddSquare = function () {
+                setCords(function (cords) { return __spreadArrays(cords, [defaultCord('square')]); });
+                internalUpdate.current = true;
+            };
             var onNameChanged = function (id, name) { return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? __assign(__assign({}, c), { name: name }) : c; }); }); };
             var onChangeCords = function (_a) {
                 var type = _a.type, id = _a.id, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                 return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? {
-                    type: type, id: id, top: top, left: left, height: height, width: width,
-                    name: c.name, color: c.color
+                    type: type, id: id, top: top, left: left, height: height, width: width, name: c.name, color: c.color
                 } : c; }); });
             };
             var onLoad = function () { return __awaiter(_this, void 0, void 0, function () {
-                var line;
+                var lines;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, openMarkup()];
                         case 1:
-                            line = _a.sent();
-                            setCords([]);
-                            setTimeout(function () { return setCords(readExportCord({
-                                lines: line.split('\n'),
+                            lines = _a.sent();
+                            setCords(readExportCord({
                                 naturalHeight: naturalHeight,
-                                naturalWidth: naturalWidth
-                            })); });
+                                naturalWidth: naturalWidth,
+                                lines: lines
+                            }));
+                            internalUpdate.current = true;
                             return [2 /*return*/];
                     }
                 });
@@ -1643,17 +1745,25 @@ var mark;
                     }
                 });
                 setTimeout(function () { return onCrop(enabled); });
+                internalUpdate.current = true;
             };
             useEffect(function () {
-                var newCords = lowLevelCords(cords, naturalHeight, naturalWidth);
+                var newCords = lowLevelCords(initialCords, naturalHeight, naturalWidth);
+                if (newCords.flat(Infinity).find(function (v) { return typeof v === 'number' && isNaN(v); }) !== undefined) {
+                    return;
+                }
                 if (!deepCompare(newCords, lowCords)) {
                     setLowCords(newCords);
+                    setCords(initialCords);
                 }
-                onChange(cords);
-            }, [cords]);
-            useEffect(function () {
-                setCords(initialCords);
             }, [initialCords]);
+            useEffect(function () {
+                if (internalUpdate.current) {
+                    setLowCords(lowLevelCords(cords, naturalHeight, naturalWidth));
+                    internalUpdate.current = false;
+                    onChange(cords);
+                }
+            }, [cords]);
             return (React.createElement(Fragment, null,
                 React.createElement(Typography, { className: classes.fileName, variant: "h4" }, name),
                 React.createElement(components.Selector, { cords: lowCords, src: src, id: src, naturalHeight: naturalHeight, naturalWidth: naturalWidth, onChange: debounce(onChangeCords, 200) }),
@@ -1662,11 +1772,163 @@ var mark;
         };
     })(components = mark.components || (mark.components = {})); // namespace components
 })(mark || (mark = {})); // namespace mark
+/// <reference path="../utils/index.ts"/>
+var mark;
+/// <reference path="../utils/index.ts"/>
+(function (mark) {
+    var Fragment = React.Fragment, useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback;
+    var _a = material.core, Box = _a.Box, Slide = _a.Slide, Dialog = _a.Dialog, Typography = _a.Typography, CircularProgress = _a.CircularProgress;
+    var loadFile = mark.utils.loadFile, loadMarkup = mark.utils.loadMarkup, readExportCord = mark.utils.readExportCord;
+    var makeStyles = material.styles.makeStyles;
+    var components;
+    (function (components) {
+        var _this = this;
+        var useStyles = makeStyles(function () { return ({
+            fullscreen: {
+                position: 'fixed',
+                zIndex: '99999',
+                height: '100vh',
+                width: '100vw',
+                top: '0px',
+                left: '0px',
+                right: '0px',
+                bottom: '0px',
+                background: '#00000080'
+            },
+            content: {
+                minWidth: '325px',
+                padding: '10px'
+            },
+            adjust: {
+                padding: '15px'
+            }
+        }); });
+        var Transition = React.forwardRef(function (props, ref) { return (React.createElement(Slide, __assign({ direction: "up", ref: ref }, props))); });
+        components.DragAndDrop = function (_a) {
+            var _b = _a.onDropped, onDropped = _b === void 0 ? function (files, cords) { return console.log({ files: files, cords: cords }); } : _b;
+            var _c = useState(false), drag = _c[0], setDrag = _c[1];
+            var _d = useState(null), drop = _d[0], setDrop = _d[1];
+            var classes = useStyles();
+            var dragHandler = useCallback(function (v) { return setDrag(v); }, [drag]);
+            var dropHandler = useCallback(function (e) {
+                e.preventDefault();
+                if (drop !== null) {
+                    return;
+                }
+                var dataTransfer = e.dataTransfer;
+                var _a = __spreadArrays(new Array(2)).map(function () { return new Map(); }), markups = _a[0], images = _a[1];
+                Array.from(dataTransfer.files).forEach(function (file) {
+                    var ext = file.name.split('.').reverse()[0];
+                    if (ext === 'png') {
+                        images.set(file.name, file);
+                    }
+                    else if (ext === 'jpg') {
+                        images.set(file.name, file);
+                    }
+                    else if (ext === 'txt') {
+                        markups.set(file.name, file);
+                    }
+                });
+                var total = images.size;
+                var files = [];
+                var cords = [];
+                var current = 0;
+                setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+                    var _i, _a, _b, name_2, f, markup, file, _c, _d, _e, _f, _g;
+                    return __generator(this, function (_h) {
+                        switch (_h.label) {
+                            case 0:
+                                _i = 0, _a = Array.from(images);
+                                _h.label = 1;
+                            case 1:
+                                if (!(_i < _a.length)) return [3 /*break*/, 7];
+                                _b = _a[_i], name_2 = _b[0], f = _b[1];
+                                markup = name_2.split('.')[0] + '.txt';
+                                return [4 /*yield*/, loadFile(f)];
+                            case 2:
+                                file = _h.sent();
+                                files.push(file);
+                                if (!markups.has(markup)) return [3 /*break*/, 5];
+                                _d = (_c = cords).push;
+                                _e = [file.url];
+                                _f = readExportCord;
+                                _g = {};
+                                return [4 /*yield*/, loadMarkup(markups.get(markup))];
+                            case 3: return [4 /*yield*/, _f.apply(void 0, [(_g.lines = _h.sent(),
+                                        _g.naturalHeight = file.naturalHeight,
+                                        _g.naturalWidth = file.naturalWidth,
+                                        _g)])];
+                            case 4:
+                                _d.apply(_c, [_e.concat([_h.sent()])]);
+                                _h.label = 5;
+                            case 5:
+                                current = current + 1;
+                                setDrop({ current: current, total: total });
+                                _h.label = 6;
+                            case 6:
+                                _i++;
+                                return [3 /*break*/, 1];
+                            case 7:
+                                onDropped(files, new Map(cords));
+                                setDrag(false);
+                                setDrop(null);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                setDrop({ current: current, total: total });
+            }, [drop]);
+            useEffect(function () {
+                var leaveTimeout = null;
+                var handler = function () { return dragHandler(true); };
+                var timeout = function (e) {
+                    e.preventDefault();
+                    if (leaveTimeout) {
+                        clearTimeout(leaveTimeout);
+                    }
+                    leaveTimeout = setTimeout(function () { return dragHandler(false); }, 200);
+                };
+                document.body.addEventListener('dragenter', handler);
+                document.body.addEventListener('dragover', timeout);
+                document.body.addEventListener('drop', dropHandler);
+                return function () {
+                    if (leaveTimeout) {
+                        clearTimeout(leaveTimeout);
+                    }
+                    document.body.removeEventListener('dragenter', handler);
+                    document.body.removeEventListener('dragover', timeout);
+                    document.body.removeEventListener('drop', dropHandler);
+                };
+            }, [dragHandler, dropHandler]);
+            if (drag && drop === null) {
+                return (React.createElement("div", { className: classes.fullscreen },
+                    React.createElement(Typography, { className: classes.adjust, variant: "h4" }, "Release files to continue")));
+            }
+            else if (drop !== null) {
+                return (React.createElement(Dialog, { TransitionComponent: Transition, open: true },
+                    React.createElement(Box, { className: classes.content, display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "stretch" },
+                        React.createElement(Box, { className: classes.adjust, display: "flex", alignItems: "center", justifyContent: "center" },
+                            React.createElement(CircularProgress, null)),
+                        React.createElement(Box, { flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" },
+                            React.createElement(Typography, { variant: "h6" }, "Loading"),
+                            React.createElement(Typography, { variant: "subtitle2" },
+                                "Current: ",
+                                drop.current,
+                                " Total: ",
+                                drop.total)))));
+            }
+            else {
+                return (React.createElement(Fragment, null));
+            }
+        };
+    })(components = mark.components || (mark.components = {})); // namespace components
+})(mark || (mark = {})); // namespace mark
 /// <reference path="./Scaffold.tsx"/>
 /// <reference path="./Files.tsx"/>
 /// <reference path="./Selector.tsx"/>
 /// <reference path="./CordPicker.tsx"/>
 /// <reference path="./Editor.tsx"/>
+/// <reference path="./DragAndDrop.tsx"/>
 /// <reference path="../components/index.ts"/>
 /// <reference path="../utils/index.ts"/>
 var mark;
@@ -1674,11 +1936,11 @@ var mark;
 /// <reference path="../utils/index.ts"/>
 (function (mark) {
     var openImage = mark.utils.openImage, saveImageFile = mark.utils.saveImageFile, saveMarkupFile = mark.utils.saveMarkupFile, createExportCord = mark.utils.createExportCord;
-    var Files = mark.components.Files, Editor = mark.components.Editor;
+    var Files = mark.components.Files, Editor = mark.components.Editor, DragAndDrop = mark.components.DragAndDrop;
     var _a = material.core, Drawer = _a.Drawer, Typography = _a.Typography;
     var Fragment = React.Fragment;
     var makeStyles = material.styles.makeStyles;
-    var useState = React.useState, useCallback = React.useCallback;
+    var useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback;
     var max = Math.max, min = Math.min;
     var pages;
     (function (pages) {
@@ -1709,16 +1971,15 @@ var mark;
             var _b = useState(null), currentFile = _b[0], setCurrentFile = _b[1];
             var _c = useState([]), files = _c[0], setFiles = _c[1];
             var _d = useState(false), crop = _d[0], setCrop = _d[1];
-            var getInitialCords = function (file) {
-                var url = file.url;
+            var getInitialCords = useCallback(function (url) {
                 if (cordsList && cordsList.has(url)) {
                     return cordsList.get(url);
                 }
                 else {
                     return [];
                 }
-            };
-            var onSave = function (url, cords) {
+            }, [cordsList]);
+            var onSave = useCallback(function (url, cords) {
                 var file = files.find(function (f) { return f.url === url; });
                 var applyRoiAdjust = function (cords, roi) { return cords.slice()
                     .filter(function (_a) {
@@ -1728,8 +1989,8 @@ var mark;
                 if (crop) {
                     var roi_2 = cords.find(function (c) { return c.type === 'roi'; });
                     var top_6 = roi_2.top, left = roi_2.left, height = roi_2.height, width = roi_2.width;
-                    var url_1 = file.url, name_2 = file.name;
-                    saveImageFile({ url: url_1, name: name_2, top: top_6, left: left, height: height, width: width });
+                    var url_1 = file.url, name_3 = file.name;
+                    saveImageFile({ url: url_1, name: name_3, top: top_6, left: left, height: height, width: width });
                     saveMarkupFile(applyRoiAdjust(cords, roi_2).map(function (_a) {
                         var name = _a.name, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                         return createExportCord({
@@ -1737,10 +1998,10 @@ var mark;
                             naturalHeight: roi_2.height,
                             naturalWidth: roi_2.width
                         });
-                    }).join("\n"), withoutExtension(name_2) + '.txt');
+                    }).join("\n"), withoutExtension(name_3) + '.txt');
                 }
                 else {
-                    var name_3 = file.name, naturalHeight_1 = file.naturalHeight, naturalWidth_1 = file.naturalWidth;
+                    var name_4 = file.name, naturalHeight_1 = file.naturalHeight, naturalWidth_1 = file.naturalWidth;
                     saveMarkupFile(cords.filter(function (_a) {
                         var type = _a.type;
                         return type !== 'roi';
@@ -1749,9 +2010,9 @@ var mark;
                         return createExportCord({
                             name: name, top: top, left: left, height: height, width: width, naturalHeight: naturalHeight_1, naturalWidth: naturalWidth_1
                         });
-                    }).join("\n"), withoutExtension(name_3) + '.txt');
+                    }).join("\n"), withoutExtension(name_4) + '.txt');
                 }
-            };
+            }, [files]);
             var onAddImage = function () { return __awaiter(_this, void 0, void 0, function () {
                 var file;
                 return __generator(this, function (_a) {
@@ -1765,11 +2026,24 @@ var mark;
                     }
                 });
             }); };
-            var onRemoveImage = function (url) {
-                URL.revokeObjectURL(url);
-                setCurrentFile(files.length > 1 ? files[0] : null);
-                setFiles(function (files) { return files.filter(function (f) { return f.url !== url; }); });
-            };
+            var onGo = useCallback(function (go) {
+                if (currentFile) {
+                    var url_2 = currentFile.url;
+                    var index = files.map(function (v, i) { return [i, v]; }).find(function (_a) {
+                        var v = _a[1];
+                        return v.url === url_2;
+                    })[0];
+                    var file = files[index + go];
+                    if (file) {
+                        setCurrentFile(file);
+                    }
+                }
+            }, [currentFile, files]);
+            var onRemoveImage = function (url) { return setFiles(function (files) {
+                var result = files.filter(function (f) { return f.url !== url; });
+                setCurrentFile(result.length === 0 ? null : result[0]);
+                return result;
+            }); };
             var onSelectImage = function (url) {
                 return setCurrentFile(files.find(function (f) { return f.url === url; }));
             };
@@ -1777,17 +2051,35 @@ var mark;
                 cordsList.set(url, cords);
                 return cordsList;
             }); };
+            var onDropped = function (files, cords) {
+                setFiles(files);
+                setCordsList(cords);
+            };
+            useEffect(function () {
+                var handler = function (e) {
+                    e.preventDefault();
+                    var key = e.key;
+                    onGo(key === 'ArrowUp' ? -1 : key === 'ArrowDown' ? 1 : 0);
+                };
+                document.addEventListener('keydown', handler);
+                return function () { return document.removeEventListener('keydown', handler); };
+            }, [onGo]);
             var render = function () {
                 if (currentFile) {
-                    return (React.createElement(Editor, { src: currentFile.url, name: currentFile.name, onCrop: function (v) { return setCrop(v); }, naturalWidth: currentFile.naturalWidth, naturalHeight: currentFile.naturalHeight, initialCords: getInitialCords(currentFile), onSave: function (cords) { return onSave(currentFile.url, cords); }, onChange: function (c) { return onEditorChange(currentFile.url, c); } }));
+                    var url_3 = currentFile.url, name_5 = currentFile.name, naturalWidth = currentFile.naturalWidth, naturalHeight = currentFile.naturalHeight;
+                    return (React.createElement(Editor, { src: url_3, name: name_5, onCrop: function (v) { return setCrop(v); }, naturalWidth: naturalWidth, naturalHeight: naturalHeight, initialCords: getInitialCords(url_3), onSave: function (cords) { return onSave(url_3, cords); }, onChange: function (c) { return onEditorChange(url_3, c); } }));
                 }
                 else {
-                    return (React.createElement(Typography, { className: classes.openFile, variant: "h4" }, "Please open file to continue"));
+                    return (React.createElement("div", { className: classes.openFile },
+                        React.createElement(Typography, { variant: "h4" }, "Please open file to continue"),
+                        React.createElement("br", null),
+                        React.createElement(Typography, { variant: "subtitle1" }, "Or drag multiple files together with txt markup (optionally) directly into the browser window. Only .png and .jpg extensions are supported")));
                 }
             };
             return (React.createElement(Fragment, null,
+                React.createElement(DragAndDrop, { onDropped: onDropped }),
                 React.createElement(Drawer, { variant: "permanent", open: true, className: classes.drawer },
-                    React.createElement(Files, { onAdd: onAddImage, files: files, onRemove: onRemoveImage, onSelect: onSelectImage })),
+                    React.createElement(Files, { files: files, current: currentFile === null || currentFile === void 0 ? void 0 : currentFile.url, onGo: onGo, onAdd: onAddImage, onRemove: onRemoveImage, onSelect: onSelectImage })),
                 React.createElement("div", { className: classes.adjust }, render())));
         };
     })(pages = mark.pages || (mark.pages = {})); // namespace components
