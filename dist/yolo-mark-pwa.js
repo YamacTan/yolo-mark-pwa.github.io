@@ -1780,7 +1780,7 @@ var mark;
 var mark;
 /// <reference path="../utils/index.ts"/>
 (function (mark) {
-    var Fragment = React.Fragment, useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback;
+    var Fragment = React.Fragment, useRef = React.useRef, useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback;
     var _a = material.core, Box = _a.Box, Slide = _a.Slide, Dialog = _a.Dialog, Typography = _a.Typography, CircularProgress = _a.CircularProgress;
     var loadFile = mark.utils.loadFile, loadMarkup = mark.utils.loadMarkup, readExportCord = mark.utils.readExportCord;
     var makeStyles = material.styles.makeStyles;
@@ -1812,6 +1812,7 @@ var mark;
             var _b = _a.onDropped, onDropped = _b === void 0 ? function (files, cords) { return console.log({ files: files, cords: cords }); } : _b;
             var _c = useState(false), drag = _c[0], setDrag = _c[1];
             var _d = useState(null), drop = _d[0], setDrop = _d[1];
+            var counter = useRef(0);
             var classes = useStyles();
             var dragHandler = useCallback(function (v) { return setDrag(v); }, [drag]);
             var dropHandler = useCallback(function (e) {
@@ -1883,24 +1884,25 @@ var mark;
                 setDrop({ current: current, total: total });
             }, [drop]);
             useEffect(function () {
-                var leaveTimeout = null;
-                var handler = function () { return dragHandler(true); };
-                var timeout = function (e) {
-                    e.preventDefault();
-                    if (leaveTimeout) {
-                        clearTimeout(leaveTimeout);
-                    }
-                    leaveTimeout = setTimeout(function () { return dragHandler(false); }, 2000);
+                var handler = function (enter) {
+                    if (enter === void 0) { enter = true; }
+                    return function (e) {
+                        e.preventDefault();
+                        counter.current += enter ? 1 : -1;
+                        dragHandler(counter.current > 0);
+                    };
                 };
-                document.body.addEventListener('dragenter', handler);
-                document.body.addEventListener('dragover', timeout);
+                var passive = function (e) { return e.preventDefault(); };
+                var leave = handler(false);
+                var enter = handler(true);
+                document.body.addEventListener('dragenter', enter);
+                document.body.addEventListener('dragleave', leave);
+                document.body.addEventListener('dragover', passive);
                 document.body.addEventListener('drop', dropHandler);
                 return function () {
-                    if (leaveTimeout) {
-                        clearTimeout(leaveTimeout);
-                    }
-                    document.body.removeEventListener('dragenter', handler);
-                    document.body.removeEventListener('dragover', timeout);
+                    document.body.removeEventListener('dragenter', enter);
+                    document.body.removeEventListener('dragleave', leave);
+                    document.body.removeEventListener('dragover', passive);
                     document.body.removeEventListener('drop', dropHandler);
                 };
             }, [dragHandler, dropHandler]);
