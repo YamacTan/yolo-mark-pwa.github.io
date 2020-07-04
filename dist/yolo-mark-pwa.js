@@ -1890,7 +1890,7 @@ var mark;
                     if (leaveTimeout) {
                         clearTimeout(leaveTimeout);
                     }
-                    leaveTimeout = setTimeout(function () { return dragHandler(false); }, 200);
+                    leaveTimeout = setTimeout(function () { return dragHandler(false); }, 2000);
                 };
                 document.body.addEventListener('dragenter', handler);
                 document.body.addEventListener('dragover', timeout);
@@ -2026,7 +2026,7 @@ var mark;
                             file = _a.sent();
                             name = file.name;
                             if (name.match(/(?:.png)/g)) {
-                                console.warn("It looks like you are opening a PNG image.\n            I highly recommend you use JPEG images with Darknet to save images without alpha channel\n          ");
+                                console.warn("\n            It looks like you are opening a PNG image.\n            I highly recommend you use JPEG images with\n            Darknet to save images without alpha channel\n          ".trim());
                             }
                             setFiles(function (files) { return __spreadArrays(files, [file]); });
                             setCurrentFile(file);
