@@ -1224,7 +1224,7 @@ var mark;
                     height: 100,
                     width: 100
                 }
-            ] : _b, _c = _a.onSave, onSave = _c === void 0 ? function () { return console.log('save'); } : _c, _d = _a.onLoad, onLoad = _d === void 0 ? function () { return console.log('load'); } : _d, _e = _a.onCrop, onCrop = _e === void 0 ? function (crop) { return console.log({ crop: crop }); } : _e, _f = _a.onDelete, onDelete = _f === void 0 ? function (id) { return console.log({ id: id }); } : _f, _g = _a.onAddRect, onAddRect = _g === void 0 ? function () { return console.log('add rect'); } : _g, _h = _a.onAddSquare, onAddSquare = _h === void 0 ? function () { return console.log('add square'); } : _h, _j = _a.onNameChanged, onNameChanged = _j === void 0 ? function (id, name) { return console.log({ name: name, id: id }); } : _j;
+            ] : _b, _c = _a.crop, crop = _c === void 0 ? false : _c, _d = _a.onSave, onSave = _d === void 0 ? function () { return console.log('save'); } : _d, _e = _a.onLoad, onLoad = _e === void 0 ? function () { return console.log('load'); } : _e, _f = _a.onCrop, onCrop = _f === void 0 ? function (crop) { return console.log({ crop: crop }); } : _f, _g = _a.onDelete, onDelete = _g === void 0 ? function (id) { return console.log({ id: id }); } : _g, _h = _a.onAddRect, onAddRect = _h === void 0 ? function () { return console.log('add rect'); } : _h, _j = _a.onAddSquare, onAddSquare = _j === void 0 ? function () { return console.log('add square'); } : _j, _k = _a.onNameChanged, onNameChanged = _k === void 0 ? function (id, name) { return console.log({ name: name, id: id }); } : _k;
             var classes = useStyles();
             var onChange = function (id, _a) {
                 var target = _a.target;
@@ -1274,7 +1274,7 @@ var mark;
                                         React.createElement(Button, { startIcon: React.createElement(CropSquare, null), onClick: onAddSquare, size: "small", variant: "outlined", color: "secondary" }, "Add square")),
                                     React.createElement(Box, { flexGrow: 1 }),
                                     React.createElement(Grid, { item: true, className: classes.center },
-                                        React.createElement(Checkbox, { onChange: function (_a) {
+                                        React.createElement(Checkbox, { checked: crop, onChange: function (_a) {
                                                 var target = _a.target;
                                                 return onCrop(target.checked);
                                             }, icon: React.createElement(Crop, null), checkedIcon: React.createElement(CropFree, null) })))))))));
@@ -1361,7 +1361,7 @@ var mark;
                             return [4 /*yield*/, utils.averageColor(url)];
                         case 2:
                             color = _b.sent();
-                            res({ url: url, name: file.name, date: date, naturalHeight: naturalHeight, naturalWidth: naturalWidth, color: color });
+                            res({ url: url, name: file.name, date: date, naturalHeight: naturalHeight, naturalWidth: naturalWidth, color: color, crop: false });
                             return [2 /*return*/];
                     }
                 });
@@ -1683,9 +1683,9 @@ var mark;
             color: color()
         }); };
         components.Editor = function (_a) {
-            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.name, name = _c === void 0 ? 'filename.png' : _c, _d = _a.initialCords, initialCords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.onCrop, onCrop = _g === void 0 ? function (crop) { return console.log({ crop: crop }); } : _g, _h = _a.onSave, onSave = _h === void 0 ? function (cords) { return console.log({ cords: cords }); } : _h, _j = _a.onChange, onChange = _j === void 0 ? function (cords) { return console.log({ cords: cords }); } : _j;
-            var _k = useState(initialCords), cords = _k[0], setCords = _k[1];
-            var _l = useState([]), lowCords = _l[0], setLowCords = _l[1];
+            var _b = _a.src, src = _b === void 0 ? 'image.png' : _b, _c = _a.name, name = _c === void 0 ? 'filename.png' : _c, _d = _a.initialCords, initialCords = _d === void 0 ? [] : _d, _e = _a.naturalHeight, naturalHeight = _e === void 0 ? 100 : _e, _f = _a.naturalWidth, naturalWidth = _f === void 0 ? 100 : _f, _g = _a.crop, crop = _g === void 0 ? false : _g, _h = _a.onCrop, onCrop = _h === void 0 ? function (crop) { return console.log({ crop: crop }); } : _h, _j = _a.onSave, onSave = _j === void 0 ? function (cords) { return console.log({ cords: cords }); } : _j, _k = _a.onChange, onChange = _k === void 0 ? function (cords) { return console.log({ cords: cords }); } : _k;
+            var _l = useState(initialCords), cords = _l[0], setCords = _l[1];
+            var _m = useState([]), lowCords = _m[0], setLowCords = _m[1];
             var internalUpdate = useRef(false);
             var classes = useStyles();
             var onAddRect = function () {
@@ -1771,7 +1771,7 @@ var mark;
                 React.createElement(Typography, { className: classes.fileName, variant: "h4" }, name),
                 React.createElement(components.Selector, { cords: lowCords, src: src, id: src, naturalHeight: naturalHeight, naturalWidth: naturalWidth, onChange: debounce(onChangeCords, 200) }),
                 React.createElement("div", { className: classes.container },
-                    React.createElement(components.CordPicker, { cords: cords, onNameChanged: onNameChanged, onSave: function () { return onSave(cords); }, onCrop: onCropChanged, onLoad: onLoad, onDelete: onDelete, onAddRect: onAddRect, onAddSquare: onAddSquare }))));
+                    React.createElement(components.CordPicker, { cords: cords, crop: crop, onNameChanged: onNameChanged, onSave: function () { return onSave(cords); }, onCrop: onCropChanged, onLoad: onLoad, onDelete: onDelete, onAddRect: onAddRect, onAddSquare: onAddSquare }))));
         };
     })(components = mark.components || (mark.components = {})); // namespace components
 })(mark || (mark = {})); // namespace mark
@@ -1975,7 +1975,6 @@ var mark;
             var _a = useState(new Map()), cordsList = _a[0], setCordsList = _a[1];
             var _b = useState(null), currentFile = _b[0], setCurrentFile = _b[1];
             var _c = useState([]), files = _c[0], setFiles = _c[1];
-            var _d = useState(false), crop = _d[0], setCrop = _d[1];
             var getInitialCords = useCallback(function (url) {
                 if (cordsList && cordsList.has(url)) {
                     return cordsList.get(url);
@@ -1984,14 +1983,25 @@ var mark;
                     return [];
                 }
             }, [cordsList]);
+            var setCrop = useCallback(function (crop) {
+                setCurrentFile(__assign(__assign({}, currentFile), { crop: crop }));
+                setFiles(files.map(function (f) {
+                    if (f.url === currentFile.url) {
+                        return __assign(__assign({}, f), { crop: crop });
+                    }
+                    else {
+                        return f;
+                    }
+                }));
+            }, [currentFile, files]);
             var onSave = useCallback(function (url, cords) {
                 var file = files.find(function (f) { return f.url === url; });
                 var applyRoiAdjust = function (cords, roi) { return cords.slice()
                     .filter(function (_a) {
                     var type = _a.type;
                     return type !== 'roi';
-                }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - roi.top, 0), left: max(c.left - roi.left, 0), height: min(max(c.top + c.height - roi.top, 0), max(roi.top + roi.height - c.top, 0), roi.height), width: min(max(c.left + c.width - roi.left, 0), max(roi.left + roi.width - c.left, 0), roi.width) })); }); };
-                if (crop) {
+                }).map(function (c) { return (__assign(__assign({}, c), { top: max(c.top - roi.top, 0), left: max(c.left - roi.left, 0), height: c.height - Math.max((c.top + c.height) - (roi.top + roi.height), 0) - Math.max(roi.top - c.top, 0), width: c.width - Math.max((c.left + c.width) - (roi.left + roi.width), 0) - Math.max(roi.left - c.left, 0) })); }); };
+                if (file.crop) {
                     var roi_2 = cords.find(function (c) { return c.type === 'roi'; });
                     var top_6 = roi_2.top, left = roi_2.left, height = roi_2.height, width = roi_2.width;
                     var url_1 = file.url, name_3 = file.name;
@@ -2075,8 +2085,8 @@ var mark;
             }, [onGo]);
             var render = function () {
                 if (currentFile) {
-                    var url_3 = currentFile.url, name_5 = currentFile.name, naturalWidth = currentFile.naturalWidth, naturalHeight = currentFile.naturalHeight;
-                    return (React.createElement(Editor, { src: url_3, name: name_5, onCrop: function (v) { return setCrop(v); }, naturalWidth: naturalWidth, naturalHeight: naturalHeight, initialCords: getInitialCords(url_3), onSave: function (cords) { return onSave(url_3, cords); }, onChange: function (c) { return onEditorChange(url_3, c); } }));
+                    var url_3 = currentFile.url, name_5 = currentFile.name, naturalWidth = currentFile.naturalWidth, naturalHeight = currentFile.naturalHeight, crop = currentFile.crop;
+                    return (React.createElement(Editor, { src: url_3, name: name_5, crop: crop, onCrop: function (v) { return setCrop(v); }, naturalWidth: naturalWidth, naturalHeight: naturalHeight, initialCords: getInitialCords(url_3), onSave: function (cords) { return onSave(url_3, cords); }, onChange: function (c) { return onEditorChange(url_3, c); } }));
                 }
                 else {
                     return (React.createElement("div", { className: classes.openFile },
