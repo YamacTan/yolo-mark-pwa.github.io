@@ -1131,7 +1131,8 @@ var mark;
                     var current = mountRef.current;
                     if (current)
                         onChange({
-                            type: 'roi', id: 'roi', top: top, left: left,
+                            type: 'roi', id: 'roi',
+                            top: top, left: left,
                             height: naturalHeight - top - bottom,
                             width: naturalWidth - left - right
                         });
@@ -1703,7 +1704,8 @@ var mark;
             var onChangeCords = function (_a) {
                 var type = _a.type, id = _a.id, top = _a.top, left = _a.left, height = _a.height, width = _a.width;
                 return setCords(function (cords) { return cords.map(function (c) { return c.id === id ? {
-                    type: type, id: id, top: top, left: left, height: height, width: width, name: c.name, color: c.color
+                    type: type, id: id, top: top, left: left, height: height, width: width,
+                    name: c.name, color: c.color
                 } : c; }); });
             };
             var onLoad = function () { return __awaiter(_this, void 0, void 0, function () {
@@ -1761,6 +1763,8 @@ var mark;
                 if (internalUpdate.current) {
                     setLowCords(lowLevelCords(cords, naturalHeight, naturalWidth));
                     internalUpdate.current = false;
+                }
+                else {
                     onChange(cords);
                 }
             }, [cords]);
@@ -2014,12 +2018,16 @@ var mark;
                 }
             }, [files]);
             var onAddImage = function () { return __awaiter(_this, void 0, void 0, function () {
-                var file;
+                var file, name;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, openImage()];
                         case 1:
                             file = _a.sent();
+                            name = file.name;
+                            if (name.match(/(?:.png)/g)) {
+                                console.warn("It looks like you are opening a PNG image.\n            I highly recommend you use JPEG images with Darknet to save images without alpha channel\n          ");
+                            }
                             setFiles(function (files) { return __spreadArrays(files, [file]); });
                             setCurrentFile(file);
                             return [2 /*return*/];
