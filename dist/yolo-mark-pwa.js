@@ -1727,7 +1727,8 @@ var mark;
             }); };
             var onCropChanged = function (enabled) {
                 if (enabled === void 0) { enabled = false; }
-                setCords(function (cords) {
+                return setCords(function (cords) {
+                    setTimeout(function () { return onCrop(enabled); });
                     if (enabled && !cords.find(function (c) { return c.type === 'roi'; })) {
                         var side = Math.min(naturalWidth, naturalHeight) * 0.05;
                         var roi_1 = {
@@ -1746,8 +1747,6 @@ var mark;
                         return cords.filter(function (c) { return c.type !== 'roi'; });
                     }
                 });
-                setTimeout(function () { return onCrop(enabled); });
-                internalUpdate.current = true;
             };
             useEffect(function () {
                 var newCords = lowLevelCords(initialCords, naturalHeight, naturalWidth);
